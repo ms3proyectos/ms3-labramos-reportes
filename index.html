@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reporte Tesorería — MS3 FacilityTrack</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:Arial,sans-serif;background:#fff;color:#222;font-size:14px}
+  .page{max-width:860px;margin:0 auto;padding:32px 40px}
+  .rpt-header{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:3px solid #b8860b;padding-bottom:16px;margin-bottom:24px;gap:16px}
+  .rpt-logo-sub{font-size:13px;color:#555;margin-top:6px}
+  .rpt-meta{text-align:right;font-size:12px;color:#555;line-height:2}
+  .section-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:#b8860b;border-bottom:1px solid #e8d5a0;padding-bottom:5px;margin:24px 0 12px}
+  .info-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px 28px;margin-bottom:16px}
+  .info-item label{font-size:10px;color:#888;text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:2px}
+  .info-item span{font-size:13px;font-weight:600;line-height:1.4}
+  .info-item.full{grid-column:1/-1}
+  .dx-box{background:#f9f9f9;border-left:3px solid #b8860b;padding:14px 16px;border-radius:4px;margin-bottom:16px}
+  .dx-label{font-size:10px;color:#888;text-transform:uppercase;display:block;margin-bottom:3px}
+  table{width:100%;border-collapse:collapse;margin-bottom:16px}
+  thead th{background:#b8860b;color:#fff;padding:10px 14px;text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.5px}
+  thead th.r{text-align:right}
+  tbody tr:nth-child(even){background:#fafafa}
+  td{padding:10px 14px;border-bottom:1px solid #eaeaea;vertical-align:top}
+  .td-r{text-align:right;font-weight:700;color:#b8860b;white-space:nowrap}
+  .td-sm{font-size:11px;color:#888;white-space:nowrap}
+  .td-pre{white-space:pre-wrap;font-size:12px;color:#555}
+  tfoot td{background:#fff8e8;font-weight:800;color:#b8860b;padding:12px 14px;border-top:2px solid #b8860b;font-size:14px}
+  .partida-block{background:#fffdf7;border:1px solid #e8d5a0;border-radius:8px;padding:16px;margin-bottom:20px}
+  .partida-title{font-weight:700;color:#b8860b;font-size:13px;margin-bottom:12px}
+  .archivo-btn{display:flex;align-items:center;gap:12px;padding:13px 16px;background:#fff;border:1px solid #ddd;border-radius:8px;text-decoration:none;color:#222;margin-bottom:8px;font-size:13px;transition:border-color .15s}
+  .archivo-btn:hover{border-color:#b8860b}
+  .archivo-icon{font-size:22px;flex-shrink:0}
+  .archivo-name{flex:1;font-weight:600;word-break:break-word;line-height:1.3}
+  .archivo-badge{background:#b8860b;color:#fff;font-size:11px;font-weight:700;padding:5px 12px;border-radius:20px;white-space:nowrap;flex-shrink:0}
+  .img-preview{max-width:100%;max-height:340px;border-radius:6px;border:1px solid #ddd;display:block;margin-bottom:10px;cursor:pointer}
+  .firma-section{display:grid;grid-template-columns:1fr 1fr;gap:40px;margin-top:44px;padding-top:20px;border-top:1px solid #ddd}
+  .firma-box{text-align:center}
+  .firma-line{border-bottom:1px solid #555;padding-bottom:36px;margin-bottom:8px}
+  .firma-label{font-size:11px;color:#666;text-transform:uppercase;letter-spacing:.5px}
+  .actions{display:flex;gap:10px;justify-content:center;margin-bottom:28px;flex-wrap:wrap}
+  .btn{padding:11px 22px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;border:none;display:inline-flex;align-items:center;gap:8px;text-decoration:none}
+  .btn-gold{background:#b8860b;color:#fff}
+  .btn-outline{background:#fff;color:#b8860b;border:2px solid #b8860b}
+  .state{text-align:center;padding:80px 20px;color:#888}
+  .state-icon{font-size:48px;margin-bottom:16px}
+  .spinner{display:inline-block;width:28px;height:28px;border:3px solid #ddd;border-top-color:#b8860b;border-radius:50%;animation:spin .7s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  @media(max-width:600px){
+    .page{padding:20px 16px}
+    .info-grid{grid-template-columns:1fr}
+    .rpt-header{flex-direction:column}
+    .rpt-meta{text-align:left}
+    .firma-section{grid-template-columns:1fr;gap:24px}
+  }
+  @media print{
+    .actions{display:none}
+    body{print-color-adjust:exact;-webkit-print-color-adjust:exact}
+  }
+</style>
+</head>
+<body>
+
+<div id="loading" class="state">
+  <div style="margin-bottom:16px"><div class="spinner"></div></div>
+  <div>Cargando reporte...</div>
+</div>
+<div id="report" style="display:none"><div class="page" id="report-content"></div></div>
+<div id="error" class="state" style="display:none">
+  <div class="state-icon">❌</div>
+  <div id="error-msg">No se pudo cargar el reporte.</div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+<script>
+firebase.initializeApp({
+  apiKey:            "AIzaSyAtr22Q0JcpceXgfJSzja0fP1QCRkD8kS0",
+  authDomain:        "ms3-labramos-facilitytrack.firebaseapp.com",
+  projectId:         "ms3-labramos-facilitytrack",
+  storageBucket:     "ms3-labramos-facilitytrack.firebasestorage.app",
+  messagingSenderId: "971160584481",
+  appId:             "1:971160584481:web:2d68aae747ac72ada37e60"
+});
+const db = firebase.firestore();
+
+function esc(s){ const d=document.createElement('div'); d.textContent=String(s||''); return d.innerHTML; }
+function fmtDate(s){ try{ return new Date(s).toLocaleDateString('es-MX',{day:'2-digit',month:'long',year:'numeric'}); }catch(e){ return s||''; } }
+
+function showError(msg){
+  document.getElementById('loading').style.display='none';
+  document.getElementById('error').style.display='block';
+  document.getElementById('error-msg').textContent=msg;
+}
+
+async function loadReport(){
+  const params=new URLSearchParams(location.search);
+  const reportId=params.get('r');
+  if(!reportId){ showError('Enlace inválido — falta el ID del reporte.'); return; }
+  try {
+    const rSnap=await db.collection('reportes').doc(reportId).get();
+    if(!rSnap.exists){ showError('Reporte no encontrado o enlace expirado.'); return; }
+    const r=rSnap.data();
+    const partidas=[];
+    for(const safeId of (r.partidas_safeIds||[])){
+      try {
+        const pSnap=await db.collection('mat_partidas').doc(`${r.folioId}_${safeId}`).get();
+        if(pSnap.exists){ const d=pSnap.data(); delete d.folioId; delete d._ts; partidas.push(d); }
+      }catch(e){}
+    }
+    renderReport(r, partidas);
+  }catch(e){ showError('Error al cargar el reporte: '+e.message); }
+}
+
+function renderReport(r, partidas){
+  document.getElementById('loading').style.display='none';
+  document.getElementById('report').style.display='block';
+  const total=partidas.reduce((s,p)=>s+(p.costo||0),0);
+  const today=new Date().toLocaleDateString('es-MX',{day:'2-digit',month:'long',year:'numeric'});
+  const logoUrl=location.origin+'/ms3-logo.png';
+  const dx=r.diagnostico||{};
+
+  const filasPart=partidas.map((p,i)=>`
+    <tr>
+      <td><strong>${esc(p.etiqueta||'Partida '+(i+1))}</strong></td>
+      <td class="td-pre">${esc(p.lista||'—')}</td>
+      <td class="td-r">$${Number(p.costo||0).toLocaleString('es-MX')}</td>
+      <td class="td-sm">${p.fecha?fmtDate(p.fecha):''}</td>
+    </tr>`).join('');
+
+  const adjuntosSection=partidas.map((p,pi)=>{
+    const archs=p.archivos||[];
+    if(!archs.length) return '';
+    const archsHtml=archs.map((c,i)=>{
+      const isImg=(c.tipo||'').startsWith('image/');
+      if(isImg) return `<img src="${c.data}" class="img-preview" alt="${esc(c.nombre||'Imagen')}" onclick="window.open(this.src)">`;
+      return `<a href="${c.data}" download="${c.nombre||'cotizacion.pdf'}" class="archivo-btn">
+        <span class="archivo-icon">📄</span>
+        <span class="archivo-name">${esc(c.nombre||'Cotización '+(i+1))}</span>
+        <span class="archivo-badge">⬇ Descargar PDF</span>
+      </a>`;
+    }).join('');
+    return `<div class="partida-block">
+      <div class="partida-title">${esc(p.etiqueta||'Partida '+(pi+1))}</div>
+      ${archsHtml}
+    </div>`;
+  }).join('');
+
+  const shareBtn=navigator.share
+    ?`<button class="btn btn-outline" onclick="navigator.share({url:location.href,title:'Reporte MS3 — ${esc(r.sucursalNombre||'')}',text:'Reporte de materiales para tesorería'})">📤 Compartir</button>`
+    :`<button class="btn btn-outline" onclick="navigator.clipboard.writeText(location.href).then(()=>{this.textContent='✓ Liga copiada';setTimeout(()=>this.textContent='📋 Copiar liga',2000)})">📋 Copiar liga</button>`;
+
+  document.getElementById('report-content').innerHTML=`
+    <div class="actions">
+      <button class="btn btn-gold" onclick="window.print()">🖨 Imprimir / Guardar PDF</button>
+      ${shareBtn}
+    </div>
+    <div class="rpt-header">
+      <div>
+        <img src="${logoUrl}" alt="MS3 Arquitectos" style="max-height:70px;width:auto;display:block" onerror="this.style.display='none';document.getElementById('logo-fb').style.display='block'">
+        <div id="logo-fb" style="display:none;font-size:22px;font-weight:900;color:#b8860b">MS3 Arquitectos</div>
+        <div class="rpt-logo-sub">Reporte de Materiales — Tesorería</div>
+      </div>
+      <div class="rpt-meta">
+        <div><strong>Sucursal:</strong> ${esc(r.sucursalNombre||'—')}</div>
+        ${r.sucursalId?`<div><strong>ID:</strong> ${esc(r.sucursalId)}</div>`:''}
+        <div><strong>Fecha:</strong> ${today}</div>
+      </div>
+    </div>
+
+    <div class="section-title">Datos del incidente</div>
+    <div class="info-grid">
+      <div class="info-item"><label>Sucursal</label><span>${esc(r.sucursalNombre||'—')}</span></div>
+      ${r.sucursalId?`<div class="info-item"><label>ID Sucursal</label><span>${esc(r.sucursalId)}</span></div>`:''}
+      ${r.tipo?`<div class="info-item"><label>Tipo de incidente</label><span>${esc(r.tipo)}</span></div>`:''}
+      ${r.urgencia?`<div class="info-item"><label>Urgencia</label><span>${esc(r.urgencia)}</span></div>`:''}
+      ${r.descripcion?`<div class="info-item full"><label>Descripción</label><span style="font-weight:400">${esc(r.descripcion)}</span></div>`:''}
+      ${r.creado?`<div class="info-item"><label>Fecha apertura</label><span>${fmtDate(r.creado)}</span></div>`:''}
+    </div>
+
+    ${dx.propuesta_solucion||dx.notas?`
+    <div class="section-title">Diagnóstico técnico</div>
+    <div class="dx-box">
+      ${dx.notas?`<div style="margin-bottom:10px"><span class="dx-label">Situación observada</span>${esc(dx.notas)}</div>`:''}
+      ${dx.propuesta_solucion?`<div><span class="dx-label">Propuesta de solución</span>${esc(dx.propuesta_solucion)}</div>`:''}
+      ${dx.analizado_por?`<div style="margin-top:10px;font-size:11px;color:#888">Analizado por: <strong>${esc(dx.analizado_por)}</strong></div>`:''}
+    </div>`:''}
+
+    <div class="section-title">Cotizaciones de materiales (${partidas.length})</div>
+    <table>
+      <thead><tr><th>Partida</th><th>Lista de materiales</th><th class="r">Costo</th><th>Fecha</th></tr></thead>
+      <tbody>${filasPart}</tbody>
+      <tfoot><tr>
+        <td colspan="2">TOTAL MATERIALES</td>
+        <td class="td-r">$${total.toLocaleString('es-MX')} MXN</td>
+        <td></td>
+      </tr></tfoot>
+    </table>
+
+    ${adjuntosSection?`<div class="section-title">Documentos adjuntos</div>${adjuntosSection}`:''}
+
+    <div class="firma-section">
+      <div class="firma-box"><div class="firma-line"></div><div class="firma-label">Elaborado por MS3 Arquitectos</div></div>
+      <div class="firma-box"><div class="firma-line"></div><div class="firma-label">Recibido / Autorizado — Tesorería</div></div>
+    </div>`;
+
+  document.title=`Reporte Tesorería — ${r.sucursalNombre||r.sucursalId||'MS3'}`;
+}
+
+firebase.auth().signInAnonymously().then(loadReport).catch(e=>showError('Error de conexión: '+e.message));
+</script>
+</body>
+</html>
