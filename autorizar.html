@@ -397,14 +397,12 @@ function renderFolio(folio) {
       <div class="label" style="margin-bottom:8px">Selecciona la cotización a autorizar *</div>
       <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:20px">
         ${cots.map((c,i)=>`
-          <label style="display:block;background:#2a2a2a;border:1px solid #555;border-radius:8px;padding:12px;cursor:pointer">
-            <div style="display:flex;align-items:flex-start;gap:10px">
-              <input type="radio" name="cot-sel" value="${i}" style="margin-top:3px;accent-color:#b8860b;cursor:pointer;flex-shrink:0">
-              <div style="font-size:13px;font-weight:700;color:#eee;flex:1;min-width:0;overflow-wrap:break-word">${c.proveedor}</div>
-            </div>
-            <div style="font-size:12px;color:#888;margin-top:4px;padding-left:24px">$${Number(c.monto||0).toLocaleString('es-MX')} MXN</div>
-            ${c.nombre?`<div style="font-size:11px;color:#888;margin-top:3px;padding-left:24px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${c.nombre}">📄 ${c.nombre}</div>`:''}
-            ${c.data?`<a href="${c.data}" download="${c.nombre||'cotizacion.pdf'}" onclick="event.stopPropagation()" style="display:inline-block;margin-top:6px;margin-left:24px;font-size:11px;color:#2196f3;text-decoration:none">⬇ Descargar PDF</a>`:''}
+          <label style="display:block;position:relative;background:#2a2a2a;border:1px solid #555;border-radius:8px;padding:12px 12px 12px 36px;cursor:pointer">
+            <input type="radio" name="cot-sel" value="${i}" style="position:absolute;left:12px;top:15px;accent-color:#b8860b;cursor:pointer">
+            <div style="font-size:13px;font-weight:700;color:#eee;text-align:center">${c.proveedor}</div>
+            <div style="font-size:12px;color:#888;margin-top:4px;text-align:center">$${Number(c.monto||0).toLocaleString('es-MX')} MXN</div>
+            ${c.nombre?`<div style="font-size:11px;color:#888;margin-top:3px;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${c.nombre}">📄 ${c.nombre}</div>`:''}
+            ${c.data?`<div style="text-align:center;margin-top:6px"><a href="${c.data}" download="${c.nombre||'cotizacion.pdf'}" onclick="event.stopPropagation()" style="font-size:11px;color:#2196f3;text-decoration:none">⬇ Descargar PDF</a></div>`:''}
           </label>`).join('')}
       </div>` : '';
     const tipoTrabajo = esJanitor ? 'tarea interna' : 'orden de trabajo';
