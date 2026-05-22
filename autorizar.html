@@ -397,12 +397,12 @@ function renderFolio(folio) {
       <div class="label" style="margin-bottom:8px">Selecciona la cotización a autorizar *</div>
       <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:20px">
         ${cots.map((c,i)=>`
-          <label style="display:flex;align-items:flex-start;gap:10px;background:#2a2a2a;border:1px solid #555;border-radius:8px;padding:12px;cursor:pointer;min-width:0;max-width:100%;box-sizing:border-box;overflow:hidden">
+          <label style="display:flex;align-items:flex-start;gap:10px;background:#2a2a2a;border:1px solid #555;border-radius:8px;padding:12px;cursor:pointer;box-sizing:border-box">
             <input type="radio" name="cot-sel" value="${i}" style="margin-top:3px;accent-color:#b8860b;cursor:pointer;flex-shrink:0">
-            <div style="flex:1;min-width:0;overflow:hidden">
-              <div style="font-size:13px;font-weight:700;color:#eee;word-break:break-word;overflow-wrap:anywhere">${c.proveedor}</div>
-              <div style="font-size:12px;color:#888;word-break:break-word;overflow-wrap:anywhere">$${Number(c.monto||0).toLocaleString('es-MX')} MXN</div>
-              ${c.nombre?`<div style="font-size:11px;color:#888;margin-top:3px;word-break:break-all;overflow-wrap:anywhere;line-height:1.4">📄 ${c.nombre}</div>`:''}
+            <div style="flex:1;min-width:0">
+              <div style="font-size:13px;font-weight:700;color:#eee;overflow-wrap:anywhere">${c.proveedor}</div>
+              <div style="font-size:12px;color:#888;overflow-wrap:anywhere">$${Number(c.monto||0).toLocaleString('es-MX')} MXN</div>
+              ${c.nombre?`<div style="font-size:11px;color:#888;margin-top:3px;overflow-wrap:anywhere;word-break:break-all;line-height:1.4">📄 ${c.nombre}</div>`:''}
               ${c.data?`<a href="${c.data}" download="${c.nombre||'cotizacion.pdf'}" onclick="event.stopPropagation()" style="display:inline-block;margin-top:6px;font-size:11px;color:#2196f3;text-decoration:none">⬇ Descargar PDF</a>`:''}
             </div>
           </label>`).join('')}
