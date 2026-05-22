@@ -400,7 +400,7 @@ function renderFolio(folio) {
           <label style="display:block;background:#2a2a2a;border:1px solid #555;border-radius:8px;padding:12px;cursor:pointer">
             <div style="display:flex;align-items:flex-start;gap:10px">
               <input type="radio" name="cot-sel" value="${i}" style="margin-top:3px;accent-color:#b8860b;cursor:pointer;flex-shrink:0">
-              <div style="font-size:13px;font-weight:700;color:#eee">${c.proveedor}</div>
+              <div style="font-size:13px;font-weight:700;color:#eee;flex:1;min-width:0;overflow-wrap:break-word">${c.proveedor}</div>
             </div>
             <div style="font-size:12px;color:#888;margin-top:4px;padding-left:24px">$${Number(c.monto||0).toLocaleString('es-MX')} MXN</div>
             ${c.nombre?`<div style="font-size:11px;color:#888;margin-top:3px;padding-left:24px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${c.nombre}">📄 ${c.nombre}</div>`:''}
