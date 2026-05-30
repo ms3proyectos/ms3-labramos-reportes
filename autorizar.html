@@ -319,9 +319,49 @@ function renderFolio(folio) {
     </div>${line}`;
   }).join('');
 
-  const fotosHtml = (folio.fotos||[]).length
-    ? `<div class="fotos">${(folio.fotos||[]).map(f=>`<a href="${f.url}" target="_blank"><img src="${f.url}" onerror="this.style.display='none'"></a>`).join('')}</div>`
-    : (folio.fotoBase64 ? `<div class="fotos"><img src="${folio.fotoBase64}" onclick="window.open(this.src)"></div>` : '<div style="color:#666;font-size:13px">Sin fotos adjuntas</div>');
+  // Recopila todas las fotos del ciclo del folio agrupadas por origen
+  const _grupos = [];
+  const _addGrupo = (label, imgs) => { if(imgs.length) _grupos.push({label, imgs}); };
+
+  // 1. Folio inicial / reporte
+  const _fotosReporte = [];
+  if(folio.fotoBase64) _fotosReporte.push({src:folio.fotoBase64});
+  (folio.fotos||[]).forEach(f=>{ if(f.url) _fotosReporte.push({src:f.url}); });
+  _addGrupo('📷 Fotos del reporte inicial', _fotosReporte);
+
+  // 2. Diagnóstico
+  const _fotosDx = (folio.diagnostico?.fotos||[]).map(f=>({src:f.url||f.base64})).filter(f=>f.src);
+  _addGrupo('🔍 Fotos del diagnóstico', _fotosDx);
+
+  // 3. Materiales (janitor)
+  const _fotosMat = (folio.materiales?.cotizaciones||[]).filter(a=>(a.tipo||'').startsWith('image/')||a.nombre?.match(/\.(jpg|jpeg|png|gif|webp)$/i)).map(a=>({src:a.data||a.url})).filter(f=>f.src);
+  _addGrupo('🔧 Fotos de materiales', _fotosMat);
+
+  // 4. ODT adjuntos (imágenes)
+  const _fotosOT = (folio.orden_trabajo_datos?.fotos||[]).map(f=>({src:f.url||f.base64})).filter(f=>f.src);
+  _addGrupo('📋 Fotos de la ODT', _fotosOT);
+
+  // 5. Cotizaciones (adjuntos imagen)
+  const _fotosCots = (folio.cotizaciones||[]).flatMap(c=>(c.adjuntos||[]).filter(a=>(a.tipo||'').startsWith('image/')).map(a=>({src:a.data||a.url}))).filter(f=>f.src);
+  _addGrupo('💰 Imágenes de cotizaciones', _fotosCots);
+
+  // 6. Bitácora (todas las entradas)
+  const _bita = folio.bitacora || [];
+  const _fotosBita = _bita.flatMap(e=>(e.fotos||[]).map(f=>({src:f.url||f.base64, titulo:e.texto||e.nota||''}))).filter(f=>f.src);
+  _addGrupo('📝 Fotos de bitácora / ejecución', _fotosBita);
+
+  // 7. Evidencias finales (galería de cierre)
+  const _fotosEv = (folio.galeria||[]).map(f=>({src:f.url||f.base64})).filter(f=>f.src);
+  _addGrupo('📸 Evidencias finales', _fotosEv);
+
+  const totalFotos = _grupos.reduce((s,g)=>s+g.imgs.length,0);
+  const fotosHtml = totalFotos === 0
+    ? '<div style="color:#666;font-size:13px">Sin fotos adjuntas en ninguna etapa</div>'
+    : _grupos.map(g=>`
+        <div style="margin-bottom:14px">
+          <div style="font-size:10px;color:#b8860b;text-transform:uppercase;letter-spacing:.7px;margin-bottom:6px">${g.label} (${g.imgs.length})</div>
+          <div class="fotos">${g.imgs.map(f=>`<a href="${f.src}" target="_blank"><img src="${f.src}" title="${f.titulo||''}" onerror="this.style.display='none'"></a>`).join('')}</div>
+        </div>`).join('');
 
   // Sección ODT
   const otHtml = ot?.descripcion ? `
@@ -452,7 +492,7 @@ function renderFolio(folio) {
   </div>
 
   <div class="card">
-    <div class="section-title">📷 Evidencia fotográfica</div>
+    <div class="section-title">📷 Evidencia fotográfica (${totalFotos})</div>
     ${fotosHtml}
   </div>
 
